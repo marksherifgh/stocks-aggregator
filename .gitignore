@@ -1,0 +1,4 @@
+venv
+sqlite.db
+output.txt
+downloaded_list.json

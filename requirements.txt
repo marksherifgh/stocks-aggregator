@@ -1,0 +1,5 @@
+requests==2.32.3
+selenium==4.24.0
+pandas==2.2.2
+openpyxl==3.1.5
+unrar==0.4
