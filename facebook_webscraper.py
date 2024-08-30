@@ -105,25 +105,25 @@ for zip_file in files_to_unzip:
 # dump data into db
 print("started dumping data into db")
 excel_files = os.listdir("data")
+conn = sqlite3.connect('sqlite.db')
+cursor = conn.cursor()
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+db_exists = cursor.fetchall()
+
+
 for excel_file in excel_files:
     date_str = excel_file.split(".")[0]
     date = datetime.strptime(date_str, "%Y-%m-%d")
-
-    conn = sqlite3.connect('sqlite.db')
-    cursor = conn.cursor()
-
-    # add check that date not in db
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    is_db_empty = False if len(cursor.fetchall()) > 0 else True
     date_exists = False
 
-    if not is_db_empty:
+    # add check that date not in db
+    if db_exists:
         cursor.execute("SELECT COUNT(*) FROM Trades WHERE date = ?", (date,))
-        date_exists = True if len(cursor.fetchall()) > 0 else False
+        date_exists = cursor.fetchall()[0][0]
 
-    if date_exists:
-        print(f"Skipping dumping {excel_file} as the date already exists in db")
-        continue
+        if date_exists:
+            print(f"Skipping dumping {excel_file} as the date already exists in db")
+            continue
 
     df = pd.read_excel(f"data/{excel_file}", sheet_name="Sheet1")
     df.rename(columns={"الرمز": "code", "السهم": "name", "السعر": "price", "الكمية": "quantity", "التغير": "change",
@@ -137,8 +137,10 @@ for excel_file in excel_files:
     df.to_sql('Trades', conn, if_exists='append', index=False)
 
     conn.commit()
-    conn.close()
     print(f"{excel_file} dumped into db successfully")
+
+conn.close()
+driver.close()
 
 # delete unneeded data directory
 print("started deleting data directory")
