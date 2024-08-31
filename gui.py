@@ -66,7 +66,7 @@ class QueryApp(QMainWindow):
         query += " GROUP BY code;"
 
         # Sample SQLite database connection
-        connection = sqlite3.connect("sqlite.db")  # Replace with your database
+        connection = sqlite3.connect("sqlite.db")
         cursor = connection.cursor()
 
         connection.commit()
